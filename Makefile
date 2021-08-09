@@ -1,4 +1,4 @@
 serve:
-	source env.sh; docker-compose up --build
+	source env.sh; source checkenv.sh; docker-compose up --build
 
 .PHONY: serve

@@ -18,11 +18,28 @@ The quickest way to get Listo running locally is to launch it via Docker Compose
 
 1. Install Docker and Docker Compose (Mac users can install both [here](https://docs.docker.com/docker-for-mac/install/)).
 2. Create an [env.sh](examples/TEMPLATE_env.sh) file in the root directory:
+  Depending on wether you'd like to use Trello or Jira for the tasks:
 
+  Jira:
   ```bash
+  # These 2 variables are required for the build, both frontend and backend
+  export TRELLO_JIRA_MODE='JIRA'
+  export REACT_APP_TRELLO_JIRA_MODE='JIRA'
+  # Give your account details
+  export JIRA_HOST='jira.somedomain.org'
+  export JIRA_USER='fake'
+  export JIRA_PASSWORD='fake'
+  export JIRA_PROJECT='PROJECT'
+  ```
+
+
+  Trello:
+  ```bash
+  # These 2 variables are required for the build, both frontend and backend
+  export TRELLO_JIRA_MODE='TRELLO'
+  export REACT_APP_TRELLO_JIRA_MODE='TRELLO'
   # Get your API Key here -> https://trello.com/app-key/
   export TRELLO_API_KEY=e94947...00a92
-
   # Click on the "Generate a Token" link here -> https://trello.com/app-key/.
   export TRELLO_TOKEN=fda876d8af87d6fa876adfa....8516dcf715
   ```

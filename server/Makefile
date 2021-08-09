@@ -5,7 +5,7 @@ prettier:
 	yarn run format
 
 serve: install prettier ../frontend/data-schema.json
-	source ../env.sh ; yarn run start
+	source ../env.sh ; source ../checkenv.sh ; yarn run start
 
 ../frontend/data-schema.json:
 	pushd ../frontend && make data-schema.json ; popd

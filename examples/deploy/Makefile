@@ -4,7 +4,8 @@ BUILD_NUMBER=$(date +%F)
 
 deploy:
 # source the env.sh to build Listo properly (some build-time variables are needed)
-	source ../../env.sh
+	source ../../env.sh;
+	source ../../checkenv.sh;
 # build container from the repository root and tag infosec/listo:latest
 	docker build ../../Dockerfile -t infosec/listo:latest
 # build the deploy container, which uses the previous container but adds the custom /data folder
@@ -39,7 +40,8 @@ deploy:
 
 deploy_prod:
 # source the env.sh to build Listo properly (some build-time variables are needed)
-	source ../../env.sh
+	source ../../env.sh;
+	source ../../checkenv.sh;
 # build container from the repository root and tag infosec/listo:latest
 	docker build ../../Dockerfile -t infosec/listo:latest
 # build the deploy container, which uses the previous container but adds the custom /data folder
