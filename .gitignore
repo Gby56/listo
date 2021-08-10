@@ -9,6 +9,7 @@ node_modules/
 server/build
 frontend/build
 frontend/data-schema.json
+examples/deploy/listodatarepo/
 
 # misc
 .vscode

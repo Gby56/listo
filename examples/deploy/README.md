@@ -17,7 +17,7 @@ This folder serves as an **example** for how Listo can be deployed to AWS and He
 
  1. Deploy `ecr.yaml` to your AWS account via AWS CloudFormation (this can be done in the UI)
  2. Update the `Makefile` with your own settings (OIDC details, VPC settings, DNS settings, etc)
- 3. Deploy Listo `make deploy`
+ 3. Deploy Listo `make AWSACCOUNT=XXXXXX deploy`
  4. Update the secret values in the AWS Secrets Manager secrets created in deployment (Slack WebHook and Trello Credentials)
 
 ## Heroku
