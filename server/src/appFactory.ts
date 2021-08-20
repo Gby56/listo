@@ -90,7 +90,34 @@ async function appFactory(db: Repository, listoData: DirectoryData) {
   });
 
 
-  async function pushToTrello(inputData, req, projectId){
+  async function pushToJira(inputData, listoData, projectId) {
+    let board;
+    try {
+      board = await jira.createJIRATasks(inputData, listoData, projectId);
+    } catch (err) {
+      try {
+        console.log("Warning of failure via Slack");
+        await slack.sendMessage(
+          JSON.stringify({
+            Status: `Listo failure to create Jira`,
+            Project: projectId,
+            ProjectDetails: inputData.projectMetaResponses,
+            Environment: process.env.STAGE,
+          }),
+        );
+      } catch (err) {
+        throw new Error(
+          `Failed to send Slack alert for Project ${projectId}: ${err}`,
+        );
+      }
+      throw new Error(
+        `Failed to create Jira tasks for project ${projectId}: ${err}.`,
+      );
+    }
+    return board;
+  }
+
+  async function pushToTrello(inputData, req, projectId) {
     let board;
     try {
 
@@ -100,6 +127,7 @@ async function appFactory(db: Repository, listoData: DirectoryData) {
         listoData,
       );
     } catch (err) {
+      console.log("Warning of failure via Slack");
       await slack.sendMessage(
         JSON.stringify({
           Status: `Failed to create Trello board for ${inputData.projectMetaResponses.boardName}.`,
@@ -137,6 +165,9 @@ async function appFactory(db: Repository, listoData: DirectoryData) {
     );
     let board = null;
     let projectId = null;
+    let details = 'Listo Project Created Successfully';
+    let status = 200;
+    let failed = false;
 
     try {
       const project: ProjectModel = { metaData: inputData };
@@ -146,46 +177,46 @@ async function appFactory(db: Repository, listoData: DirectoryData) {
         `Failed to store project ${projectId} in the database: ${err}.`,
       );
     }
-    switch(TRELLO_JIRA_MODE){
+    switch (TRELLO_JIRA_MODE) {
       case "JIRA":
         console.log("Pushing to JIRA");
-        board = await jira.createJIRATasks(inputData,listoData,projectId);
+        board = await pushToJira(inputData, listoData, projectId);
         break;
       case "TRELLO":
         console.log("Pushing to Trello");
-        board = await pushToTrello(inputData,req,projectId);
+        board = await pushToTrello(inputData, req, projectId);
         break;
     }
 
+    if (!failed) {
+      try {
+        await db.update(projectId, board.shortUrl);
+      } catch (err) {
+        throw new Error(
+          `Failed to update project (${projectId}) with board url ${board.shortUrl}: ${err}.`,
+        );
+      }
 
-    try {
-      await db.update(projectId, board.shortUrl);
-    } catch (err) {
-      throw new Error(
-        `Failed to update project (${projectId}) with board url ${board.shortUrl}: ${err}.`,
-      );
+      try {
+        await slack.sendMessage(
+          JSON.stringify({
+            Status: `Project ${inputData.projectMetaResponses.boardName} Created Successfully!`,
+            Project: buildProjectURL(req.protocol, req.hostname, projectId),
+            ProjectDetails: inputData.projectMetaResponses,
+            Trello: board.shortUrl,
+            Environment: process.env.STAGE,
+          }),
+        );
+      } catch (err) {
+        throw new Error(
+          `Failed to send Slack alert for Project ${projectId}: ${err}`,
+        );
+      }
     }
-
-    try {
-      await slack.sendMessage(
-        JSON.stringify({
-          Status: `Project ${inputData.projectMetaResponses.boardName} Created Successfully!`,
-          Project: buildProjectURL(req.protocol, req.hostname, projectId),
-          ProjectDetails: inputData.projectMetaResponses,
-          Trello: board.shortUrl,
-          Environment: process.env.STAGE,
-        }),
-      );
-    } catch (err) {
-      throw new Error(
-        `Failed to send Slack alert for Project ${projectId}: ${err}`,
-      );
-    }
-
     res.json({
       id: projectId,
-      details: 'Listo Project Created Successfully',
-      status: 200,
+      details: details,
+      status: status,
     });
   });
 

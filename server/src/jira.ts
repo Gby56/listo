@@ -30,16 +30,18 @@ const projectname = inputdata.projectMetaResponses.boardName;
 const projectdetails = inputdata.projectMetaResponses;
 const selectedMaturity = inputdata.selectedMaturity[0].selection;
 const selectedRisks = inputdata.selectedRisks.filter(x => x.selection != 'No')[0].selection;
-
-const boardname = JIRA_PROJECT;
-const metas = await jira.getIssueCreateMetadata({'projectKeys':[boardname]});
-const jiraproj = await jira.getProject(boardname);
-const workitemmeta = metas.projects[0].issuetypes.filter(x=>x.name == 'Work Item')[0];
-const subtaskmeta = metas.projects[0].issuetypes.filter(x=>x.name == 'Backlog Task')[0];
-const maintask = await createMainTask(workitemmeta, jiraproj, listoProjectId, boardname, listodata, projectname, projectdetails, selectedRisks,selectedMaturity);
-const subtasks = await createCategorieSubTasks(maintask, boardname, inputdata, listodata, subtaskmeta, jiraproj);
-
+try{
+    const boardname = JIRA_PROJECT;
+    const metas = await jira.getIssueCreateMetadata({'projectKeys':[boardname]});
+    const jiraproj = await jira.getProject(boardname);
+    const workitemmeta = metas.projects[0].issuetypes.filter(x=>x.name == 'Work Item')[0];
+    const subtaskmeta = metas.projects[0].issuetypes.filter(x=>x.name == 'Backlog Task')[0];
+    const maintask = await createMainTask(workitemmeta, jiraproj, listoProjectId, boardname, listodata, projectname, projectdetails, selectedRisks,selectedMaturity);
+    const subtasks = await createCategorieSubTasks(maintask, boardname, inputdata, listodata, subtaskmeta, jiraproj);
     return {'shortUrl': 'https://'+JIRA_HOST+'/browse/'+maintask.key};
+} catch(err) {
+    throw new Error(`${err}`);
+}
 };
 
 
