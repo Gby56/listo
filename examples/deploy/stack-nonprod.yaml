@@ -44,11 +44,29 @@ Parameters:
 
   JiraProject:
     Type: String
-    Description: The JIRA Project you want to create issues into
+    Description: The JIRA Project key you want to create issues into
+
+  JiraProjectID:
+    Type: String
+    Description: The JIRA Project ID you want to create issues into
+    Default: ''
 
   CertificateArn:
     Description: ACM certificate for the load balancer
     Type: String
+
+  JiraTaskID:
+    Type: String
+    Description: The JIRA Task ID you want to use for the issue type
+
+  JiraSubTaskID:
+    Type: String
+    Description: The JIRA Sub Task ID you want to use for the issue type
+
+  JiraAssignOrComponent:
+    Type: String
+    Description: You can either assign to the service account itself, or to the default assignee for the Component named "Listo Assessment"
+    Default: 'ASSIGN'
 
   # OidcAuthorizationEndpoint:
   #   Description: Authorization endpoint of the IdP
@@ -214,6 +232,14 @@ Resources:
               Value: !Ref JiraPassword
             - Name: JIRA_PROJECT
               Value: !Ref JiraProject
+            - Name: JIRA_TASK_ID
+              Value: !Ref JiraTaskID
+            - Name: JIRA_SUBTASK_ID
+              Value: !Ref JiraSubTaskID
+            - Name: JIRA_PROJECT_ID
+              Value: !Ref JiraProjectID
+            - Name: JIRA_ASSIGN_OR_COMPONENT
+              Value: !Ref JiraAssignOrComponent
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -250,10 +276,12 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: secretsmanager:GetSecretValue
+                Action: 
+                  - secretsmanager:GetSecretValue
                 Resource:
                   - !Ref TrelloCredentialsSecret
                   - !Ref SlackWebHookSecret
+                  - !Ref JiraPassword
               - Effect: Allow
                 Action:
                   - dynamodb:Query
@@ -289,6 +317,7 @@ Resources:
 
   ListoService:
     Type: AWS::ECS::Service
+    DependsOn: HttpsListener
     Properties:
       Cluster: !Ref Cluster
       TaskDefinition: !Ref TaskDefinition
@@ -360,7 +389,7 @@ Resources:
   JiraPassword:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: listo/trello-credentials
+      Name: listo/jira-password
       Description: Trello JIRA password for Listo
 
   SlackWebHookSecret:

@@ -31,6 +31,7 @@ export async function sendMessage(message: string): Promise<any> {
     WEBHOOK_SECRET_ID,
     SLACK_TARGET_CHANNEL,
   } = process.env;
+  if (!process.env["WEBHOOK_SECRET_ID"] || process.env["WEBHOOK_SECRET_ID"] === "") return;
   if (!SLACK_WEB_HOOK && !WEBHOOK_SECRET_ID) {
     console.log(`Slack alert ${prepareSlackMessage(message)}`);
     return;

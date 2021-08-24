@@ -195,15 +195,23 @@ Resources:
             - Name: TRELLO_TEAM
               Value: !Ref TrelloTeam
             - Name: TRELLO_JIRA_MODE
-              Value: !Ref TRELLO_JIRA_MODE
+              Value: !Ref TrelloJiraMode
             - Name: JIRA_HOST
-              Value: !Ref JIRA_HOST
+              Value: !Ref JiraHost
             - Name: JIRA_USER
-              Value: !Ref JIRA_USER
+              Value: !Ref JiraUser
             - Name: JIRA_PASSWORD
-              Value: !Ref JIRA_PASSWORD
+              Value: !Ref JiraPassword
             - Name: JIRA_PROJECT
-              Value: !Ref JIRA_PROJECT
+              Value: !Ref JiraProject
+            - Name: JIRA_TASK_ID
+              Value: !Ref JiraTaskID
+            - Name: JIRA_SUBTASK_ID
+              Value: !Ref JiraSubTaskID
+            - Name: JIRA_PROJECT_ID
+              Value: !Ref JiraProjectID
+            - Name: JIRA_ASSIGN_OR_COMPONENT
+              Value: !Ref JiraAssignOrComponent
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -347,11 +355,11 @@ Resources:
       Name: listo/trello-credentials
       Description: Trello API credentials for Listo
 
-  JIRA_PASSWORD:
-  Type: AWS::SecretsManager::Secret
-  Properties:
-    Name: listo/trello-credentials
-    Description: Trello JIRA password for Listo
+  JiraPassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: listo/jira-password
+      Description: Trello JIRA password for Listo
 
   SlackWebHookSecret:
     Type: AWS::SecretsManager::Secret

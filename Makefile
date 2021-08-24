@@ -2,3 +2,6 @@ serve:
 	source env.sh; source checkenv.sh; docker-compose up --build
 
 .PHONY: serve
+
+test:
+	source env.sh; source checkenv.sh; docker-compose up --build -d; echo "deployed"; sleep 4; echo "Testing...."; curl -X POST http://localhost:8000/api/project -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Referer: http://localhost:8000/assessment' -H 'Content-Type: application/json' -H 'Origin: http://localhost:8000' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' -d '{"selectedRisks":[{"text":"Do you want supporting teams such as Security and Architecture to reach out throughout the project?","selection":"Yes"}],"selectedMaturity":[{"text":"Which stage is your project/feature on ?","selection":"Discovery"}],"selectedModulesByCategory":{"code":["authentication","authorisation","csrf","internal_libs","open_source","third_party_libs","urls","xml","xss"],"data":["general","nosql","object_store","rds"],"general":["abuse","services","telemetry","threat_modeling"],"service_provider":["aws","datacentre"],"software_env":["containers","servers"]},"projectMetaResponses":{"boardName":"test","slackTeam":"test","slackUserName":"test","codeLocation":"test","trelloEmail":"gmarquet","riskLevel":"High Risk"},"selectedTools":["Gantry","Buildkite","Snyk","Auth Sidecar"]}' -o raw
