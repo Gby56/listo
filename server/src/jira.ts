@@ -46,8 +46,11 @@ const checkEnvVars = (vars) => {
     }
 };
 
-checkEnvVars(["JIRA_HOST","JIRA_USER","JIRA_PASSWORD","JIRA_TASK_ID","JIRA_SUBTASK_ID","JIRA_ASSIGN_OR_COMPONENT"]);
-
+checkEnvVars(["JIRA_HOST","JIRA_USER","JIRA_TASK_ID","JIRA_SUBTASK_ID","JIRA_ASSIGN_OR_COMPONENT"]);
+if(!process.env["JIRA_PASSWORD"] && !process.env["JIRA_SECRET_ID"]){
+    console.error('[error]: Neither JIRA_PASSWORD or JIRA_SECRET_ID have been provided, at least one environment variable is required')
+    process.exit(1)
+}
 
 
 const capitalize = (s) => {
