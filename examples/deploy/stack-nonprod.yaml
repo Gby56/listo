@@ -220,6 +220,8 @@ Resources:
               Value: !Ref TrelloCredentialsSecret
             - Name: DYNAMODB_TABLE
               Value: !Ref BoardsTable
+            - Name: LISTO_DATABASE
+              Value: 'Dynamo'
             - Name: TRELLO_TEAM
               Value: !Ref TrelloTeam
             - Name: TRELLO_JIRA_MODE

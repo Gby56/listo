@@ -14,6 +14,7 @@ const JIRA_TASK_ID = process.env.JIRA_TASK_ID; // your jira task id (found by ca
 const JIRA_SUBTASK_ID = process.env.JIRA_SUBTASK_ID; // your jira subtask id (same as above)
 const JIRA_ASSIGN_OR_COMPONENT = process.env.JIRA_ASSIGN_OR_COMPONENT; // the mode you wish to use, either assign the issue or auto assign via the component in the JIRA project
 let cachedSecretResponse: AWS.SecretsManager.GetSecretValueResponse | undefined;
+let jira_password, jira;
 
 const sm = new AWS.SecretsManager({ region });
 const getSecretParams: AWS.SecretsManager.GetSecretValueRequest = {
@@ -30,13 +31,12 @@ async function getJIRAPW() {
       cachedSecretResponse ||
       (await sm.getSecretValue(getSecretParams).promise());
   
-    const parsedSecrets = JSON.parse(cachedSecretResponse.SecretString);
-    return parsedSecrets.slack;
+    const parsedSecrets = cachedSecretResponse.SecretString;
+    return parsedSecrets;
 }
 
 const checkEnvVars = (vars) => {
     for(const v of vars){
-        console.log(v +"="+ process.env[v]);
         if (!process.env[v]) {
             console.error('[error]: The "'+v+'" environment variable is required')
             process.exit(1)
@@ -46,14 +46,7 @@ const checkEnvVars = (vars) => {
 
 checkEnvVars(["JIRA_HOST","JIRA_USER","JIRA_PASSWORD","JIRA_TASK_ID","JIRA_SUBTASK_ID","JIRA_ASSIGN_OR_COMPONENT"]);
 
-let jira = new JiraApi({
-    protocol: 'https',
-    host: JIRA_HOST,
-    username: JIRA_USER,
-    password: '',
-    apiVersion: '2',
-    strictSSL: true
-  });
+
 
 const capitalize = (s) => {
 if (typeof s !== 'string') return ''
@@ -61,10 +54,15 @@ return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export async function createJIRATasks(inputdata, listodata, listoProjectId){
-const jira_password = await getJIRAPW();
-jira.password = jira_password;
-
-
+jira_password = await getJIRAPW();
+jira = new JiraApi({
+    protocol: 'https',
+    host: JIRA_HOST,
+    username: JIRA_USER,
+    password: jira_password,
+    apiVersion: '2',
+    strictSSL: true
+  });
 const projectname = inputdata.projectMetaResponses.boardName;
 const projectdetails = inputdata.projectMetaResponses;
 const selectedMaturity = inputdata.selectedMaturity[0].selection;
@@ -79,9 +77,6 @@ try{
         console.error('[error]: JIRA_PROJECT and JIRA_PROJECT_ID environment variables are not set ! At least one required');
         process.exit(1)
     }
-    console.log("JIRA_PROJECT=" + JIRA_PROJECT);
-    console.log("JIRA_PROJECT_ID=" + JIRA_PROJECT_ID);
-    console.log("jiraproj=" + JSON.stringify(jiraproj));
     const workitemmeta = {id: JIRA_TASK_ID}
     const subtaskmeta = {id: JIRA_SUBTASK_ID}
     const maintask = await createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks,selectedMaturity);
@@ -95,6 +90,7 @@ try{
 //https://jira.talendforge.org/rest/api/2/issue/createmeta?projectKeys=xx&expand=projects.issuetypes.fields
 async function createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks, selectedMaturity){
 try{
+
     let payload = {
         "fields": {
             "issuetype":{ "id": workitemmeta.id},
