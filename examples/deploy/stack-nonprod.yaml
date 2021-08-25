@@ -230,7 +230,7 @@ Resources:
               Value: !Ref JiraHost
             - Name: JIRA_USER
               Value: !Ref JiraUser
-            - Name: JIRA_PASSWORD
+            - Name: JIRA_SECRET_ID
               Value: !Ref JiraPassword
             - Name: JIRA_PROJECT
               Value: !Ref JiraProject

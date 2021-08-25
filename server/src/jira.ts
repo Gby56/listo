@@ -15,15 +15,17 @@ const JIRA_SUBTASK_ID = process.env.JIRA_SUBTASK_ID; // your jira subtask id (sa
 const JIRA_ASSIGN_OR_COMPONENT = process.env.JIRA_ASSIGN_OR_COMPONENT; // the mode you wish to use, either assign the issue or auto assign via the component in the JIRA project
 let cachedSecretResponse: AWS.SecretsManager.GetSecretValueResponse | undefined;
 let jira_password, jira;
+const JIRA_SECRET_ID = process.env.JIRA_SECRET_ID;
+
 
 const sm = new AWS.SecretsManager({ region });
 const getSecretParams: AWS.SecretsManager.GetSecretValueRequest = {
-  SecretId: JIRA_PASSWORD,
+  SecretId: JIRA_SECRET_ID,
 };
 
 async function getJIRAPW() {
-    if (process.env.JIRA_PASSWORD_CACHE) {
-      return process.env.JIRA_PASSWORD_CACHE;
+    if (process.env.JIRA_PASSWORD) {
+      return process.env.JIRA_PASSWORD;
     }
   
     // avoid looking up the secret every time
