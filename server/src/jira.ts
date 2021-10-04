@@ -71,7 +71,7 @@ jira = new JiraApi({
 const projectname = inputdata.projectMetaResponses.boardName;
 const projectdetails = inputdata.projectMetaResponses;
 const selectedMaturity = inputdata.selectedMaturity[0].selection;
-const selectedRisks = inputdata.selectedRisks.filter(x => x.selection != 'No')[0].selection;
+const selectedRisks = inputdata.selectedRisks;
 try{
     let jiraproj;
     if(JIRA_PROJECT_ID != ""){
@@ -95,7 +95,10 @@ try{
 //https://jira.talendforge.org/rest/api/2/issue/createmeta?projectKeys=xx&expand=projects.issuetypes.fields
 async function createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks, selectedMaturity){
 try{
-
+    let risks = "";
+    for(const r of selectedRisks){
+        risks += `-  ${r.text} : ${r.selection} \n`
+    }
     let payload = {
         "fields": {
             "issuetype":{ "id": workitemmeta.id},
@@ -105,7 +108,8 @@ try{
             "description": 
             `h3. *Feature name:* ${projectname}
             h3. *Project maturity:* ${selectedMaturity}
-            h3. *Project risks:* ${selectedRisks}
+            h3. *Project risks:* 
+            ${risks}
             h3. *Team Slack channel:* #${projectdetails.slackTeam}
             h3. *Contact Slack username:* @${projectdetails.slackUserName}
             h3. *Documentation link:* [${projectdetails.codeLocation}|${projectdetails.codeLocation}]

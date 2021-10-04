@@ -30,6 +30,6 @@ services:
       - SLACK_WEB_HOOK
 
     volumes:
-        - ./data:/etc/listo/data:ro
+        - ../infosec-listo/data:/etc/listo/data:ro
     ports:
       - 8000:8000

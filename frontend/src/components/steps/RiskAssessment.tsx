@@ -14,7 +14,6 @@ const RiskAssessmentContainer = () => {
     return <div>Loading risk questions....</div>;
   }
 
-  const visibleRisks = getRisksToDisplay(risks);
 
   return (
     <React.Fragment>
@@ -29,7 +28,7 @@ const RiskAssessmentContainer = () => {
         </Grid>
       </Grid>
 
-      {visibleRisks.map(({ text, options, description }, index) => (
+      {risks.map(({ text, options, description }, index) => (
         <RiskCriteria
           key={text}
           text={text}

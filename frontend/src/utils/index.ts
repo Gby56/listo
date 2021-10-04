@@ -10,41 +10,18 @@ export const getIndexOfLatestAnswer = (risks: Risk[]) => {
 };
 
 export const getRisksToDisplay = (risks: Risk[]) => {
-  const lastAnswerIndex = getIndexOfLatestAnswer(risks);
-
-  return risks.filter((_, index, array) => {
-    if (index === 0 || index <= lastAnswerIndex) {
-      return true;
-    }
-    if (array[index - 1].options.find(o => o.selected && !o.risk)) {
-      return true;
-    }
-    return false;
-  });
+  return risks;
 };
 
 export const getRiskLevel = (risks: Risk[]) => {
-  const lastAnswerIndex = getIndexOfLatestAnswer(risks);
+  
+  const selectedRisks = risks.filter(r => r.options.filter(o=>o.selected).length > 0);
+  const highRisk = selectedRisks.filter(r => r.options.filter(o => o.selected && o.risk == 'High Risk').length > 0);
+  const mediumRisk = selectedRisks.filter(r => r.options.filter(o => o.selected && o.risk == 'Medium Risk').length > 0);
+  const lowRisk = selectedRisks.filter(r => r.options.filter(o => o.selected && o.risk == 'Low Risk').length > 0);
 
-  if (lastAnswerIndex > -1) {
-    const lastSelectedRisk = risks[lastAnswerIndex];
-
-    const selectedAnswer = lastSelectedRisk.options.find(o => o.selected);
-
-    return selectedAnswer ? selectedAnswer.risk : undefined;
-  }
-};
-
-export const isFinalStep = (
-  risks: Risk[],
-  selectedIndex: number,
-  text: string,
-) => {
-  if (selectedIndex >= risks.length) {
-    return false;
-  }
-
-  const foundAnswer = risks[selectedIndex].options.find(o => o.text === text);
-
-  return foundAnswer ? Boolean(foundAnswer.risk) : false;
+  if(highRisk.length > 0) return 'High Risk';
+  else if(mediumRisk.length > 0) return 'Medium Risk';
+  else if(lowRisk.length > 0) return 'Low Risk';
+  return null;
 };
