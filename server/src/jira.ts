@@ -85,12 +85,36 @@ try{
     const workitemmeta = {id: JIRA_TASK_ID}
     const subtaskmeta = {id: JIRA_SUBTASK_ID}
     const maintask = await createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks,selectedMaturity);
+    const link = await linkMainTaskToEpic(maintask, projectdetails);
     const subtasks = await createCategorieSubTasks(maintask, inputdata, listodata, workitemmeta, jiraproj);
     return {'shortUrl': 'https://'+JIRA_HOST+'/browse/'+maintask.key};
 } catch(err) {
     throw new Error(`${err}`);
 }
 };
+
+async function linkMainTaskToEpic(maintask, projectdetails){
+    let payload = {
+        "type": {
+            "name": "Blocks"
+        },
+        "inwardIssue": {
+            "key": maintask.key
+        },
+        "outwardIssue": {
+            "key": projectdetails.jiraKey
+        }
+    }
+    try{
+        const result = await jira.issueLink(payload);
+        console.log(`JIRA ${projectdetails.jiraKey} was linked to ${maintask.key}`);
+        return result;
+    }catch (e){
+        console.log(e.message);
+        throw new Error('Calling JIRA API failed: '+e.message)
+    }
+}
+
 
 //https://jira.talendforge.org/rest/api/2/issue/createmeta?projectKeys=xx&expand=projects.issuetypes.fields
 async function createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks, selectedMaturity){
@@ -102,11 +126,12 @@ try{
     let payload = {
         "fields": {
             "issuetype":{ "id": workitemmeta.id},
-            "summary": `[${projectdetails.riskLevel}] Listo: ${projectname}`,
+            "summary": `PSR | [${projectdetails.riskLevel}] [${projectdetails.jiraKey}] ${projectname}`,
             "project": jiraproj,
-            "labels": ["listo_"+ projectdetails.riskLevel.split(' ')[0].toLowerCase()],
+            "labels": ["risk_"+ projectdetails.riskLevel.split(' ')[0].toLowerCase()],
             "description": 
-            `h3. *Feature name:* ${projectname}
+            `h3. *Global Epic:* ${projectdetails.jiraKey}
+            h3. *Feature name:* ${projectname}
             h3. *Project maturity:* ${selectedMaturity}
             h3. *Project risks:* 
             ${risks}
@@ -119,10 +144,10 @@ try{
         };
 
     if(JIRA_ASSIGN_OR_COMPONENT == "COMPONENT"){
-            payload.fields.components = [{name:"Listo Assessment"}];
+            payload.fields.components = [{name:"Risk Assessment"}];
     }
     if(JIRA_ASSIGN_OR_COMPONENT == "ASSIGN"){
-        payload.fields.assignee = {"name": JIRA_USER};
+        // payload.fields.assignee = {"name": JIRA_USER};
     }
     const result = await jira.addNewIssue(payload);
 
@@ -173,7 +198,7 @@ for (let moduleKey of inputData.selectedModulesByCategory[category]) {
             }
         }
     }
-    subtaskDescription = subtaskDescription + `h3. *Category-Module:* ${capitalize(category)}-${capitalize(moduleKey)}
+    subtaskDescription = subtaskDescription + `h3. *Module:* ${capitalize(moduleKey)}
 
     h6. Description:
     {noformat}${trelloDescription}{noformat}
@@ -188,7 +213,7 @@ for (let moduleKey of inputData.selectedModulesByCategory[category]) {
 let payload = {
     "fields": {
         "issuetype":{"name": "Sub-task"},
-        "summary": "Listo: " + inputData.projectMetaResponses.boardName + " [Category: "+category+"]",
+        "summary": "PSR | " + inputData.projectMetaResponses.boardName + " [Category: "+category+"]",
         "project": jiraproj,
         "description": subtaskDescription,
         "parent": { "key": parentTask.key }
@@ -196,10 +221,10 @@ let payload = {
 };
 
 if(JIRA_ASSIGN_OR_COMPONENT == "COMPONENT"){
-    payload.fields.components = [{name:"Listo Assessment"}];
+    payload.fields.components = [{name:"Risk Assessment"}];
 }
 if(JIRA_ASSIGN_OR_COMPONENT == "ASSIGN"){
-    payload.fields.assignee = {"name": JIRA_USER};
+    // payload.fields.assignee = {"name": JIRA_USER};
 }
     return jira.addNewIssue(payload);
 }
