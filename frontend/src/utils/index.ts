@@ -23,5 +23,5 @@ export const getRiskLevel = (risks: Risk[]) => {
   if(highRisk.length > 0) return 'High Risk';
   else if(mediumRisk.length > 0) return 'Medium Risk';
   else if(lowRisk.length > 0) return 'Low Risk';
-  return null;
+  return '';
 };
