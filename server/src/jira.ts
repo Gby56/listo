@@ -85,7 +85,9 @@ try{
     const workitemmeta = {id: JIRA_TASK_ID}
     const subtaskmeta = {id: JIRA_SUBTASK_ID}
     const maintask = await createMainTask(workitemmeta, jiraproj, listoProjectId, listodata, projectname, projectdetails, selectedRisks,selectedMaturity);
-    const link = await linkMainTaskToEpic(maintask, projectdetails);
+    const link = await linkMainTaskToEpic(maintask, projectdetails.jiraKey);
+    if('jiraKey2' in projectdetails) await linkMainTaskToEpic(maintask, projectdetails.jiraKey2);
+
     const subtasks = await createCategorieSubTasks(maintask, inputdata, listodata, workitemmeta, jiraproj);
     return {'shortUrl': 'https://'+JIRA_HOST+'/browse/'+maintask.key};
 } catch(err) {
@@ -93,7 +95,7 @@ try{
 }
 };
 
-async function linkMainTaskToEpic(maintask, projectdetails){
+async function linkMainTaskToEpic(maintask, jiraKey){
     let payload = {
         "type": {
             "name": "Blocks"
@@ -102,12 +104,12 @@ async function linkMainTaskToEpic(maintask, projectdetails){
             "key": maintask.key
         },
         "outwardIssue": {
-            "key": projectdetails.jiraKey
+            "key": jiraKey
         }
     }
     try{
         const result = await jira.issueLink(payload);
-        console.log(`JIRA ${projectdetails.jiraKey} was linked to ${maintask.key}`);
+        console.log(`JIRA ${jiraKey} was linked to ${maintask.key}`);
         return result;
     }catch (e){
         console.log(e.message);
@@ -130,13 +132,14 @@ try{
             "project": jiraproj,
             "labels": ["risk_"+ projectdetails.riskLevel.split(' ')[0].toLowerCase()],
             "description": 
-            `h3. *Global Epic:* ${projectdetails.jiraKey}
+            `h3. *Team Epic:* ${projectdetails.jiraKey}
+            h3. *Optional related task (opt):* ${projectdetails.jiraKey2}
             h3. *Feature name:* ${projectname}
             h3. *Project maturity:* ${selectedMaturity}
             h3. *Project risks:* 
             ${risks}
             h3. *Team Slack channel:* #${projectdetails.slackTeam}
-            h3. *Contact Slack username:* @${projectdetails.slackUserName}
+            h3. *People involved in the assessment:* @${projectdetails.slackUserName}
             h3. *Documentation link:* [${projectdetails.codeLocation}|${projectdetails.codeLocation}]
             h3. *Jira username:* [~${projectdetails.trelloEmail}]
             `

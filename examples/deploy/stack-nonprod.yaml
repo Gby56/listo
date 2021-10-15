@@ -22,8 +22,8 @@ Parameters:
     Default: listo
 
   IngressCIDR:
-    Description: The Security group allowed source ips to connect directly to the application
-    Type: String
+    Description: The comma-delimited list of allowed source ips to connect directly to the application
+    Type: CommaDelimitedList
     Default: ''
 
   TrelloTeam:
